@@ -283,6 +283,6 @@ def main():
 
 if __name__ == "__main__":
     clear_screen()
-    ctypes.windll.kernel32.SetConsoleTitleW("RobinCodes Web Penetration Kit | Made") # sets window name
+    ctypes.windll.kernel32.SetConsoleTitleW("RobinsToolkit | Made By: Robin") # sets window name
     update()
     main()
