@@ -18,7 +18,7 @@ Robins Toolkit is a basic web testing toolkit with basic features, including:
 
 # Updates
 
-• Added a basic XSS tester which detects 'input' fields on a websites and tries a multitude of XSS strings on them. 
+06/12/2024: Added a basic XSS tester which detects 'input' fields on a websites and tries a multitude of XSS strings on them. 
 
 # Discord
 Discord: https://discord.gg/6pSR2Rcqeg
