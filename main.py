@@ -6,6 +6,7 @@ import sublist3r
 import time
 import nmap
 from bs4 import BeautifulSoup
+import re
 
 version = "1.0" # current version
 
@@ -24,12 +25,13 @@ def logo():
 def help():
     clear_screen()
     logo()
-    print("\nWelcome to RobinCodes Web Penertration Toolkit\n\nCurrently this tool only has basic features e.g. subdomain enumaration, port scanning and etc, however, much more is coming soon.\n")
+    print("\nWelcome to RobinToolkit\n\nCurrently this tool only has basic features e.g. subdomain enumaration, port scanning and etc, however, much more is coming soon.\n")
     print("Github: https://github.com/RobinCodes\n")
 
     input("\nPress any button to continue....")
     main()
 
+#auto updater script
 def update():
     url = 'https://raw.githubusercontent.com/RobinCodes/Robins-Toolkit/refs/heads/main/version.txt' 
     
@@ -133,7 +135,7 @@ def leak_search():
     clear_screen()
     logo()
 
-    host = input("\nKeyword/Email/Username: ")
+    host = input("\nEmail/Username: ")
     print("")
 
     leaks1 = requests.get(f"https://psbdmp.ws/api/search/{host}")
@@ -212,10 +214,78 @@ def google_dorks():
     input("\nPress any button to continue....")
     main()
 
+def xss():
+    clear_screen()
+    logo()
+
+    website = input("\nWebsite: ")
+    xss_file_path = "xss.txt" # file path with all the xss strings   
+
+    try:
+        response = requests.get(website)
+        response.raise_for_status()  # Check for errors
+    except requests.RequestException as e:
+        print(f"Error fetching the URL: {e}")
+        input("\nPress any button to continue....")
+        main()
+
+    # Parse the page 
+    soup = BeautifulSoup(response.content, 'html.parser')
+
+    # gets all the input box's on the page
+    input_boxes = soup.find_all('input', type='text')
+    
+    if not input_boxes:
+        print("\nNo text input boxes found on the page.")
+        input("\nPress any button to continue....")
+        main()
+
+    with open(xss_file_path, 'r', encoding='utf-8') as file:
+        xss_list = file.readlines()
+
+    #loop
+    for input_box in input_boxes:
+        input_name = input_box.get('name', 'Unnamed Input')
+        print(f"\nTesting input box for XSS Vulnerabilities: {input_name}")
+        
+        for xss_data in xss_list:
+            xss_data = xss_data.strip()  
+            if not xss_data:
+                continue  # Skip emtpy stuff
+
+            post_data = {input_name: xss_data}
+
+            action_url = website
+
+            try:
+                post_response = requests.post(action_url, data=post_data)
+                alert_pattern = re.compile(r'alert\((.*?)\);', re.DOTALL)
+                match = alert_pattern.search(post_response.text)
+
+                if match:
+                    alert_message = match.group(1).strip("'\"")  
+                    print(f"\nAlert box detected, however, not vulnerable.")
+                    
+                    if xss_data in alert_message:
+                        print(f"Working XSS String: {xss_data}")
+                        input("\nPress any button to continue....")
+                        main()   
+                else:
+                    print("No alert box popped up.")  # No alert box found
+                    input("\nPress any button to continue....")
+                    main()
+            except requests.RequestException as e:
+                print(f"Error during POST request: {e}") # gets errors
+                input("\nPress any button to continue....")
+                main()
+
+    input("\nPress any button to continue....")
+    main()
+
 def web_scraper():
     clear_screen()
     logo()
-    website = input("\nWebsite (https://google.com): ")
+    website = input("\nWebsite (https://example.com): ")
 
     req = requests.get(f"{website}")
 
@@ -236,9 +306,9 @@ def main():
 ╔════════════════════════════════════════════════════════════════╗
     Recon               Pentesting               Data Search                  
         
-    1. IP              5. Subdomain finder      7. Leak Check  
+    1. IP              5. Subdomain finder      8. Leak Check  
     2. Port Scanner    6. Web Vunerabilty 
-    3. Google Dorks
+    3. Google Dorks    7. XSS Finder [BETA]
     4. Web Scraper
 
 ╚════════════════════════════════════════════════════════════════╝
@@ -271,14 +341,18 @@ def main():
 
                         else:
                             if option == "7":
-                                leak_search()
+                                xss()
 
                             else:
-                                if option == "H" or "h" or "help" or "Help":
-                                    help()
+                                if option == "8":
+                                    leak_search()
 
                                 else:
-                                    main() # if random data is entered it goes back to main()
+                                    if option == "H" or "h" or "help" or "Help":
+                                        help()
+
+                                    else:
+                                        main() # if random data is entered it goes back to main()
 
 
 if __name__ == "__main__":
