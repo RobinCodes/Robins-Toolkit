@@ -8,7 +8,7 @@ import nmap
 from bs4 import BeautifulSoup
 import re
 
-version = "1.0" # current version
+version = "1.1" # current version
 
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
@@ -139,12 +139,13 @@ def leak_search():
     print("")
 
     leaks1 = requests.get(f"https://psbdmp.ws/api/search/{host}")
-    leaks2 = requests.get(f"https://psbdmp.ws/api/search/{host}")
+    leaks2 = requests.get(f"https://api.proxynova.com/comb?query={host}")
     leaks3 = requests.get(f"https://api.xposedornot.com/v1/check-email/{host}")
 
     if leaks1.status_code == 200:
-        data1 = leaks1
+        data1 = leaks1.json()
         print(data1)
+        print("")
     else:
         print("")
         print({"status": "fail", "message": "Unable to retrieve data"})
@@ -160,7 +161,6 @@ def leak_search():
     if leaks3.status_code == 200:
         data3 = leaks3.json()
         print(data3)
-        print("")
         print("")
     else:
         print("")
